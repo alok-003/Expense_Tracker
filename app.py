@@ -36,7 +36,7 @@ def add_transaction():
     if not title or title.strip() == "":
         return jsonify({"error": "Title required"}), 400
     try:
-        amount = int(amount)
+        amount = float(amount)
     except:
         return jsonify({"error": "Amount must be a number"}), 400
     if amount <= 0:
@@ -88,3 +88,4 @@ def summary():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
