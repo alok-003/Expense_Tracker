@@ -31,9 +31,8 @@ This project allows users to **add, update, delete, and view** their income and 
 
 ## 📂 Project Structure  
 
-Expense_Tracker/
-│
-├── app.py # Flask backend with REST APIs
-├── index.html # Frontend UI
-├── expenses.db # SQLite database file (auto-created if missing)
-└── README.md # Documentation
+- **Expense_Tracker**
+-    app.py # Flask backend with REST APIs
+-    index.html # Frontend UI
+-    expenses.db # SQLite database file (auto-created if missing)
+-    README.md # Documentation
