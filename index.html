@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Finance Tracker</title>
+  <title>Finance Tracker</title
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: Arial; max-width: 800px; margin: auto; padding: 20px; }
@@ -22,7 +22,7 @@
 
   <form id="transactionForm">
     <input type="text" id="title" placeholder="Title" required>
-    <input type="number" id="amount" placeholder="Amount" required>
+    <input type="text" id="amount" placeholder="Amount" required>
     <select id="type">
       <option value="expense">Expense</option>
       <option value="income">Income</option>
@@ -76,7 +76,6 @@
         </tr>`;
       });
 
-      // pagination
       const pagDiv = document.getElementById("pagination");
       pagDiv.innerHTML = "";
       for (let i = 1; i <= data.total_pages; i++) {
