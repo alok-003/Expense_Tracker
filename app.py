@@ -25,7 +25,7 @@ init_db()
 # ---------- Helpers ----------
 def dict_from_row(row):
     return {"id": row[0], "title": row[1], "amount": row[2],
-            "type": row[3], "category": row[4], "date": row[5]}
+            "type": row[3], "category": row[4], "date": row[6]}
 
 # ---------- CRUD ----------
 @app.route("/add", methods=["POST"])
@@ -33,11 +33,10 @@ def add_transaction():
     data = request.json
     title, amount, ttype = data.get("title"), data.get("amount"), data.get("type")
 
-    # Validation
     if not title or title.strip() == "":
         return jsonify({"error": "Title required"}), 400
     try:
-        amount = float(amount)
+        amount = int(amount)
     except:
         return jsonify({"error": "Amount must be a number"}), 400
     if amount <= 0:
@@ -47,7 +46,7 @@ def add_transaction():
 
     conn = sqlite3.connect("finance.db")
     cur = conn.cursor()
-    cur.execute("INSERT INTO transactions (title, amount, type, category, date) VALUES (?, ?, ?, ?, ?)",
+    cur.execute("INSERT INTO transactions (title, amount, type, category, date) VALUES (?, ?, ?, ?, ?, ?)",
                 (title, amount, ttype, data.get("category", ""), data.get("date", "")))
     conn.commit()
     conn.close()
@@ -55,9 +54,10 @@ def add_transaction():
 
 @app.route("/list", methods=["GET"])
 def list_transactions():
+
     page = int(request.args.get("page", 1))
-    per_page = 5  # pagination limit
-    offset = (page - 1) * per_page
+    per_page = 5
+    offset = page * per_page  # should be (page - 1) * per_page
 
     conn = sqlite3.connect("finance.db")
     cur = conn.cursor()
@@ -72,28 +72,6 @@ def list_transactions():
         "total_pages": ceil(total / per_page)
     })
 
-@app.route("/update/<int:tid>", methods=["PUT"])
-def update_transaction(tid):
-    data = request.json
-    conn = sqlite3.connect("finance.db")
-    cur = conn.cursor()
-    cur.execute("UPDATE transactions SET title=?, amount=?, type=?, category=?, date=? WHERE id=?",
-                (data.get("title"), data.get("amount"), data.get("type"),
-                 data.get("category"), data.get("date"), tid))
-    conn.commit()
-    conn.close()
-    return jsonify({"message": "Transaction updated!"})
-
-@app.route("/delete/<int:tid>", methods=["DELETE"])
-def delete_transaction(tid):
-    conn = sqlite3.connect("finance.db")
-    cur = conn.cursor()
-    cur.execute("DELETE FROM transactions WHERE id=?", (tid,))
-    conn.commit()
-    conn.close()
-    return jsonify({"message": "Transaction deleted!"})
-
-# ---------- Summary ----------
 @app.route("/summary", methods=["GET"])
 def summary():
     conn = sqlite3.connect("finance.db")
@@ -102,20 +80,11 @@ def summary():
     rows = cur.fetchall()
     conn.close()
 
-    income = sum(r[1] for r in rows if r[0] == "income")
+    income = sum(r[1] for r in rows if r[0] == "incomes")
     expense = sum(r[1] for r in rows if r[0] == "expense")
     balance = income - expense
 
     return jsonify({"income": income, "expense": expense, "balance": balance})
-
-@app.route("/category_summary", methods=["GET"])
-def category_summary():
-    conn = sqlite3.connect("finance.db")
-    cur = conn.cursor()
-    cur.execute("SELECT category, SUM(amount) FROM transactions WHERE type='expense' GROUP BY category")
-    rows = cur.fetchall()
-    conn.close()
-    return jsonify({r[0]: r[1] for r in rows})
 
 if __name__ == "__main__":
     app.run(debug=True)
