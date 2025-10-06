@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Finance Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial; max-width: 800px; margin: auto; padding: 20px; }
+    h1 { text-align: center; }
+    form { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    input, select, button { padding: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #f4f4f4; }
+    .summary { margin: 15px 0; font-weight: bold; }
+    .pagination { margin: 10px; text-align: center; }
+    .pagination button { margin: 2px; }
+  </style>
+</head>
+<body>
+  <h1>Finance Tracker</h1>
+
+  <form id="transactionForm">
+    <input type="text" id="title" placeholder="Title" required>
+    <input type="number" id="amount" placeholder="Amount" required>
+    <select id="type">
+      <option value="expense">Expense</option>
+      <option value="income">Income</option>
+    </select>
+    <input type="text" id="category" placeholder="Category">
+    <input type="date" id="date">
+    <button type="submit">Add</button>
+  </form>
+
+  <div class="summary" id="summaryBox">Loading summary...</div>
+
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Title</th><th>Amount</th><th>Type</th><th>Category</th><th>Date</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="transactionList"></tbody>
+  </table>
+
+  <div class="pagination" id="pagination"></div>
+
+  <canvas id="chart" width="400" height="200"></canvas>
+
+  <script>
+    const API = "http://127.0.0.1:5000";
+    let currentPage = 1;
+
+    async function fetchSummary() {
+      const res = await fetch(`${API}/summary`);
+      const s = await res.json();
+      document.getElementById("summaryBox").innerText =
+        `Income: ₹${s.income} | Expense: ₹${s.expense} | Balance: ₹${s.balance}`;
+    }
+
+    async function fetchTransactions(page=1) {
+      currentPage = page;
+      const res = await fetch(`${API}/list?page=${page}`);
+      const data = await res.json();
+      const tbody = document.getElementById("transactionList");
+      tbody.innerHTML = "";
+      data.transactions.forEach(t => {
+        tbody.innerHTML += `<tr>
+          <td>${t.id}</td>
+          <td>${t.title}</td>
+          <td>${t.amount}</td>
+          <td>${t.type}</td>
+          <td>${t.category}</td>
+          <td>${t.date}</td>
+          <td>
+            <button onclick="deleteTransaction(${t.id})">❌</button>
+          </td>
+        </tr>`;
+      });
+
+      // pagination
+      const pagDiv = document.getElementById("pagination");
+      pagDiv.innerHTML = "";
+      for (let i = 1; i <= data.total_pages; i++) {
+        pagDiv.innerHTML += `<button onclick="fetchTransactions(${i})" ${i===page?"disabled":""}>${i}</button>`;
+      }
+    }
+
+    async function deleteTransaction(id) {
+      await fetch(`${API}/delete/${id}`, { method: "DELETE" });
+      fetchTransactions(currentPage);
+      fetchSummary();
+      drawChart();
+    }
+
+    document.getElementById("transactionForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const t = {
+        title: document.getElementById("title").value,
+        amount: document.getElementById("amount").value,
+        type: document.getElementById("type").value,
+        category: document.getElementById("category").value,
+        date: document.getElementById("date").value
+      };
+      await fetch(`${API}/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(t)
+      });
+      e.target.reset();
+      fetchTransactions();
+      fetchSummary();
+      drawChart();
+    });
+
+    async function drawChart() {
+      const res = await fetch(`${API}/category_summary`);
+      const data = await res.json();
+      const ctx = document.getElementById("chart").getContext("2d");
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(data),
+          datasets: [{
+            label: 'Expenses by Category',
+            data: Object.values(data),
+            backgroundColor: ['#ff6384','#36a2eb','#ffcd56','#4caf50','#9966ff']
+          }]
+        }
+      });
+    }
+
+    fetchTransactions();
+    fetchSummary();
+    drawChart();
+  </script>
+</body>
+</html>
