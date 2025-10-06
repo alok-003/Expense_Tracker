@@ -57,7 +57,7 @@ def list_transactions():
 
     page = int(request.args.get("page", 1))
     per_page = 5
-    offset = page * per_page  # should be (page - 1) * per_page
+   offset = (page - 1) * per_page 
 
     conn = sqlite3.connect("finance.db")
     cur = conn.cursor()
@@ -88,4 +88,5 @@ def summary():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
