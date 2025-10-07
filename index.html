@@ -111,21 +111,25 @@
     });
 
     async function drawChart() {
-      const res = await fetch(`${API}/category_summary`);
-      const data = await res.json();
-      const ctx = document.getElementById("chart").getContext("2d");
-      new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels: Object.keys(data),
-          datasets: [{
-            label: 'Expenses by Category',
-            data: Object.values(data),
-            backgroundColor: ['#ff6384','#36a2eb','#ffcd56','#4caf50','#9966ff']
-          }]
-        }
-      });
+const res = await fetch(${API}/category_summary);
+const data = await res.json();
+const ctx = document.getElementById("chart").getContext("2d");
+
+if (chartInstance) chartInstance.destroy(); 
+chartInstance = new Chart(ctx, {
+type: 'pie',
+data: {
+labels: Object.keys(data),
+datasets: [{
+label: 'Expenses by Category',
+data: Object.values(data),
+backgroundColor: ['#ff6384','#36a2eb','#ffcd56','#4caf50','#9966ff']
+}]
     }
+  });
+}
+
+
 
     fetchTransactions();
     fetchSummary();
@@ -133,4 +137,5 @@
   </script>
 </body>
 </html>
+
 
