@@ -25,7 +25,7 @@ This project allows users to **add, update, delete, and view** their income and 
 | **Backend** | Python (Flask) |
 | **Database** | SQLite | 
 | **Visualization** | Chart.js |
-| **API Communication** | Fetch API + Flask CROS |
+| **API Communication** | Fetch API + Flask CORS |
 
 ---
 
