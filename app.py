@@ -25,7 +25,7 @@ init_db()
 # ---------- Helpers ----------
 def dict_from_row(row):
     return {"id": row[0], "title": row[1], "amount": row[2],
-            "type": row[3], "category": row[4], "date": row[6]}
+            "type": row[3], "category": row[4], "date": row[5]}
 
 # ---------- CRUD ----------
 @app.route("/add", methods=["POST"])
@@ -88,5 +88,6 @@ def summary():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
