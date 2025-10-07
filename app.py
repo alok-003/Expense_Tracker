@@ -80,7 +80,7 @@ def summary():
     rows = cur.fetchall()
     conn.close()
 
-    income = sum(r[1] for r in rows if r[0] == "incomes")
+    income = sum(r[1] for r in rows if r[0] == "income")
     expense = sum(r[1] for r in rows if r[0] == "expense")
     balance = income - expense
 
@@ -88,6 +88,7 @@ def summary():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
